@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: laboratorio_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: docker_analista
+      POSTGRES_PASSWORD: ${POSTGRES_DOCKER_PASSWORD:?Configura POSTGRES_DOCKER_PASSWORD}
+      POSTGRES_DB: laboratorio_docker
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_datos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docker_analista -d laboratorio_docker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql:
+    image: mysql:8.4
+    container_name: laboratorio_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configura MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: laboratorio_mysql
+      MYSQL_USER: analista_mysql
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Configura MYSQL_PASSWORD}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mysql_datos:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mariadb:
+    image: mariadb:11.4
+    container_name: laboratorio_mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Configura MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: laboratorio_mariadb
+      MARIADB_USER: analista_mariadb
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?Configura MARIADB_PASSWORD}
+    ports:
+      - "127.0.0.1:3308:3306"
+    volumes:
+      - mariadb_datos:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+
+
+volumes:
+  postgres_datos:
+  mysql_datos:
+  mariadb_datos:
